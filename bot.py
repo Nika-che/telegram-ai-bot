@@ -17,16 +17,22 @@ logging.basicConfig(
 )
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_MODEL = os.getenv(
+    "OPENROUTER_MODEL",
+    "meta-llama/llama-3.1-8b-instruct:free",
+)
 
 if not BOT_TOKEN:
     raise RuntimeError("BOT_TOKEN is not set")
 
-if not OPENAI_API_KEY:
-    raise RuntimeError("OPENAI_API_KEY is not set")
+if not OPENROUTER_API_KEY:
+    raise RuntimeError("OPENROUTER_API_KEY is not set")
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(
+    api_key=OPENROUTER_API_KEY,
+    base_url="https://openrouter.ai/api/v1",
+)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -55,7 +61,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     try:
         response = client.chat.completions.create(
-            model=OPENAI_MODEL,
+            model=OPENROUTER_MODEL,
             messages=[
                 {
                     "role": "system",
@@ -72,9 +78,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await update.message.reply_text(answer)
 
     except Exception:
-        logging.exception("OpenAI request failed")
+        logging.exception("OpenRouter request failed")
         await update.message.reply_text(
-            "Ошибка при обращении к ИИ. Проверь ключ API и попробуй позже."
+            "Ошибка при обращении к ИИ. Попробуй позже."
         )
 
 
